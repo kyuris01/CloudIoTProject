@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+  
+    <input type="text" id="myInput" placeholder="Enter your ID">
+    <button id="myButton">Send ID</button>
+    
+    <script>
+        document.getElementById("myButton").addEventListener("click", function() {
+          var inputValue = document.getElementById("myInput").value;
+          // 버튼을 클릭하면 서버로 POST 요청을 보냄
+          fetch('/authorize', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message: inputValue }) // 입력값을 JSON 형식으로 전송
+          })
+          .then(response => response.json())
+          .then(data => {
+            const authorizationUrl = data.authorizationUrl;
+            const previousURL = authorizationUrl;
+            console.log("check1");
+            window.location.href = authorizationUrl; //check
+            
+            
+          })
+          .catch(error => console.error(error));
+        });
+        
+      </script>
+</body>
+</html>
