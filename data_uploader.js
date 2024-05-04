@@ -1,4 +1,6 @@
 const AWS = require('aws-sdk');
+const callData = require('./api_call');
+
 require('dotenv').config();
 
 AWS.config.update({
@@ -9,27 +11,26 @@ AWS.config.update({
 });
 
 const s3 = new AWS.S3();
-const stringObject = require('./api_call');
-console.log("~~~~~~~~~~~~~~~~~~~~~~~~~");
-console.log(stringObject);
 
-console.log("-----------------------");
-console.log(stringObject);
-// console.log("type1:"+ typeof activityData);
-// console.log("type2:"+ typeof jsondata)
-const params = {
-    Bucket: "team6fitbitdata",
-    Key: "data/ex3.json",
-    Body: stringObject,
-    function (err,data) {
-        console.log(JSON.stringify(err) + " " + JSON.stringify(data));
-      }
-};
+callData.fetchActivitySummary(callData.accessToken)
+.then(data => {
+    let params = {
+        Bucket: "team6fitbitdata",
+        Key: data.user_id + "/" + data.date + ".json",
+        Body: data.stringObject
+    };
 
-s3.upload(params, function (err, data) {
-    if(err) {
-        throw err;
-    }
-    console.log("File uploaded successfully.");
-})
+    s3.upload(params, function (err, data) {
+        if(err) {
+            throw err;
+        }
+        console.log("File uploaded successfully.");
+    })
+}); //api_call.js에서는 멀쩡하던 변수가 이 파일로 import하자 undefined로 사라졌음...
+
+
+
+
+
+
 

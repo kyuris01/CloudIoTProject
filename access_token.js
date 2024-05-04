@@ -1,7 +1,7 @@
 const axios = require('axios');
 const crypto = require('crypto');
 
-const clientId = '23RXFW';
+const clientId = process.env.CLIENT_ID;
 
 // 랜덤한 문자열 생성 함수
 function generateRandomString(length) {
