@@ -25,10 +25,8 @@
           .then(data => {
             const authorizationUrl = data.authorizationUrl;
             const previousURL = authorizationUrl;
-            console.log("check1");
+            //console.log("check1");
             window.location.href = authorizationUrl; //인증URL로 리다이렉트
-            
-            
           })
           .catch(error => console.error(error));
         });

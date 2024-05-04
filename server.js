@@ -1,3 +1,4 @@
+require('dotenv').config();
 const nunjucks = require("nunjucks")
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -6,7 +7,7 @@ const axios = require('axios');
 const app = express();
 const port = 3000;
 const get_acc_token = require('./access_token');
-require('dotenv').config();
+
 let user_ID;
 const client_ID = process.env.CLIENT_ID;
 
@@ -18,13 +19,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // 정적 파일 서빙 (HTML 파일 제공)
 app.use(express.static('public'));
-let verifier2; //global verifier
-
 
 app.set("view engine", "html")
 nunjucks.configure("./views", {
     express:app
 })
+console.log(client_ID);
 
 app.get('/', (req, res)=> {
     res.render("index.html");
@@ -34,11 +34,10 @@ app.get('/', (req, res)=> {
 app.post('/authorize', cors(), (req, res) => {
     console.log('POST 요청이 들어옴:', req.body); // 요청 바디에 포함된 데이터 출력
     //user_ID = req.body;
-    let {verifier, challenge} = get_acc_token.generatePKCEChallenge();
-    verifier2 = verifier;
+
     const authCodeUrl = 'https://www.fitbit.com/oauth2/authorize';
     //const redirectUri = 'https://localhost:3000';
-    const authorizationUrl = authCodeUrl + "?response_type=code&client_id=" + "23RXDZ" + "&scope=activity+cardio_fitness+electrocardiogram+heartrate+location+nutrition+oxygen_saturation+profile+respiratory_rate+settings+sleep+social+temperature+weight&code_challenge_method=S256&code_challenge=" + challenge + "&state=" + get_acc_token.generateStateValue();
+    const authorizationUrl = authCodeUrl + "?response_type=code&client_id=" + "23RXDZ" + "&scope=activity+cardio_fitness+electrocardiogram+heartrate+location+nutrition+oxygen_saturation+profile+respiratory_rate+settings+sleep+social+temperature+weight&code_challenge_method=S256&code_challenge=" + get_acc_token.code_challenge + "&state=" + get_acc_token.generateStateValue();
     
     res.send({authorizationUrl : authorizationUrl});
   });
@@ -64,21 +63,20 @@ app.post('/redirect', (req, res) => {
     const authorizationCode = queryParams.code; //인증코드추출
 
     console.log('Authorization Code:', authorizationCode);
-
     const params = new URLSearchParams(); //https://blog.naver.com/qls0147/222561243457
     params.append('grant_type', "authorization_code")
     params.append('code', authorizationCode)
     params.append('client_id', "23RXDZ")
-    params.append('code_verifier', verifier2)
+    params.append('code_verifier', get_acc_token.code_verifier)
     axios.post(
         "https://api.fitbit.com/oauth2/token?client_id=" + "23RXDZ" + "&grant_type=authorization_code&code=" + authorizationCode + "&expires_in=2592000",
         params,
         {headers : {
-            'Authorization': "Basic " + authorizationCode,
+            'Authorization': "Basic " + 'MjNSWERaOmMwOTUyNjYzMmFhNjQ0NDI4Njg1NzRhMjI1MzU0ZTc2', //Basic_Token == "Basic " + base64encode(client_id + ":" + client_secret)
             'Content-Type' : "application/x-www-form-urlencoded;charset=UTF-8"   
         }}
     )
-    .then((response) => console.log(response.data.errors))
+    .then((response) => console.log(response.data))
     .catch((error) => console.error('요청오류: ', error));
 })
 

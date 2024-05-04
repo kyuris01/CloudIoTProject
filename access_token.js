@@ -1,14 +1,19 @@
 const axios = require('axios');
 const crypto = require('crypto');
-
+const randomstring = require("randomstring");
+const base64url = require("base64url");
 const clientId = process.env.CLIENT_ID;
+require('dotenv').config();
 
 // 랜덤한 문자열 생성 함수
-function generateRandomString(length) {
-  return crypto.randomBytes(Math.ceil(length / 2))
-    .toString('hex')
-    .slice(0, length);
-}
+const code_verifier = randomstring.generate(128);
+
+const base64Digest = crypto
+  .createHash('sha256')
+  .update(code_verifier)
+  .digest("base64");
+
+const code_challenge = base64url.fromBase64(base64Digest);
 
 function generateStateValue() {
   // 랜덤 바이트를 생성하여 base64로 인코딩
@@ -17,23 +22,12 @@ function generateStateValue() {
   return stateValue;
 }
 
-// PKCE 코드 생성
-function generatePKCEChallenge() {
-  const verifier = generateRandomString(43); // 43바이트 길이의 랜덤 문자열 생성
-  const challenge = crypto.createHash('sha256').update(verifier).digest('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, ''); // Base64 URL-Safe 인코딩
-  return { verifier, challenge };
-}
-// 사용자에게 authorizationUrl로 리다이렉트하고, authorization code를 얻습니다.
-const { verifier, challenge } = generatePKCEChallenge();
 
+console.log("code_verifier :", code_verifier);
+console.log("code_challenge :", code_challenge);
 module.exports = {
-  verifier:verifier,
-  challenge:challenge,
   clientId:clientId,
-  generateRandomString : generateRandomString,
-  generatePKCEChallenge : generatePKCEChallenge,
+  code_verifier:code_verifier,
+  code_challenge:code_challenge,
   generateStateValue : generateStateValue
 };
