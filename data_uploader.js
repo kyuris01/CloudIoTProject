@@ -1,6 +1,5 @@
 const AWS = require('aws-sdk');
 const callData = require('./api_call');
-
 require('dotenv').config();
 
 AWS.config.update({
@@ -16,7 +15,7 @@ callData.fetchActivitySummary(callData.accessToken)
 .then(data => {
     let params = {
         Bucket: "team6fitbitdata",
-        Key: data.user_id + "/" + data.date + ".json",
+        Key:  data.user_id + "/" + data.date + ".json",
         Body: data.stringObject
     };
 

@@ -84,7 +84,7 @@ app.post('/redirect', (req, res) => {
         }}
     )
     .then((response) => {
-        console.log("This is resopnse.data:" + response.data) //여기서 문제나는중.
+        console.log("This is resopnse.data:" + response.data)
 
         const s3 = new AWS.S3();
 
